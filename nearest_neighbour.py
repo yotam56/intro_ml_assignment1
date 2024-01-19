@@ -54,22 +54,15 @@ def predictknn(classifier, x_test: np.array):
     :param x_test: numpy array of size (n, d) containing test examples that will be classified
     :return: numpy array of size (n, 1) classifying the examples in x_test
     """
-    predictions = []  # TODO: type
+    predictions = []
     k = classifier['k']
     x_train = classifier['x_train']
     y_train = classifier['y_train']
 
     for test_vector in x_test:
-        # Calculate distances between test_vector and all x_train using numpy.linalg.norm
         distances = [euclidean_distance(test_vector, x_train[i]) for i in range(len(x_train))]
-
-        # Sort by distance and return the indices of the first k neighbors
         k_indices = np.argsort(distances)[:k]
-
-        # Extract the labels of the nearest neighbors
         k_nearest_labels = [y_train[i] for i in k_indices]
-
-        # Majority vote, most common class label
         most_common = Counter(k_nearest_labels).most_common(1)
         predictions.append(most_common[0][0])
 
@@ -109,9 +102,27 @@ def simple_test():
     print(f"The {i}'th test sample was classified as {preds[i]}")
 
 
+def test_knn():
+
+    x_train = np.array([[1, 2], [2, 3], [3, 4], [4, 5], [5, 6]])
+    y_train = np.array([0, 1, 0, 1, 0])
+    x_test = np.array([[1, 1], [4, 4], [6, 6]])
+    expected_labels = np.array([0, 1, 0])
+    classifier = learnknn(3, x_train, y_train)
+    predicted_labels = predictknn(classifier, x_test)
+
+    if np.array_equal(predicted_labels.flatten(), expected_labels):
+        print("Test Passed: Predicted labels match the expected labels.")
+    else:
+        print("Test Failed: Predicted labels do not match the expected labels.")
+        print("Predicted labels:", predicted_labels.flatten())
+        print("Expected labels:", expected_labels)
+
+
 if __name__ == '__main__':
 
     # before submitting, make sure that the function simple_test runs without errors
+    test_knn()
     simple_test()
 
 

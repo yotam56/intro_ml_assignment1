@@ -1,10 +1,11 @@
 import numpy as np
 from scipy.spatial import distance
+from collections import Counter
 
 
 def gensmallm(x_list: list, y_list: list, m: int):
     """
-    gensmallm generates a random sample of size m along side its labels.
+    gensmallm generates a random sample of size m alongside its labels.
 
     :param x_list: a list of numpy arrays, one array for each one of the labels
     :param y_list: a list of the corresponding labels, in the same order as x_list
@@ -25,7 +26,15 @@ def gensmallm(x_list: list, y_list: list, m: int):
     return rearranged_x[:m], rearranged_y[:m]
 
 
-# todo: complete the following functions, you may add auxiliary functions or define class to help you
+def euclidean_distance(x1, x2):
+    """
+    Compute the Euclidean distance between two vectors.
+
+    :param x1: First vector
+    :param x2: Second vector
+    :return: Euclidean distance
+    """
+    return np.linalg.norm(x1 - x2)
 
 def learnknn(k: int, x_train: np.array, y_train: np.array):
     """
@@ -35,16 +44,36 @@ def learnknn(k: int, x_train: np.array, y_train: np.array):
     :param y_train: numpy array of size (m, 1) containing the labels of the training sample
     :return: classifier data structure
     """
-    raise NotImplementedError()
+    classifier = {'k': k, 'x_train': x_train, 'y_train': y_train}
+    return classifier
 
 def predictknn(classifier, x_test: np.array):
     """
 
-    :param classifier: data structure returned from the function learnknn
+    :param classifier: data structure returned from the function learn knn
     :param x_test: numpy array of size (n, d) containing test examples that will be classified
     :return: numpy array of size (n, 1) classifying the examples in x_test
     """
-    raise NotImplementedError()
+    predictions = []  # TODO: type
+    k = classifier['k']
+    x_train = classifier['x_train']
+    y_train = classifier['y_train']
+
+    for test_vector in x_test:
+        # Calculate distances between test_vector and all x_train using numpy.linalg.norm
+        distances = [euclidean_distance(test_vector, x_train[i]) for i in range(len(x_train))]
+
+        # Sort by distance and return the indices of the first k neighbors
+        k_indices = np.argsort(distances)[:k]
+
+        # Extract the labels of the nearest neighbors
+        k_nearest_labels = [y_train[i] for i in k_indices]
+
+        # Majority vote, most common class label
+        most_common = Counter(k_nearest_labels).most_common(1)
+        predictions.append(most_common[0][0])
+
+    return np.array(predictions).reshape(-1, 1)
 
 
 def simple_test():

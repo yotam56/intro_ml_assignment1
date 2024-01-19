@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.spatial import distance
 from collections import Counter
+import matplotlib.pyplot as plt
+
+data = np.load('mnist_all.npz')
 
 
 def gensmallm(x_list: list, y_list: list, m: int):
@@ -70,7 +73,6 @@ def predictknn(classifier, x_test: np.array):
 
 
 def simple_test():
-    data = np.load('mnist_all.npz')
 
     train0 = data['train0']
     train1 = data['train1']
@@ -119,10 +121,50 @@ def test_knn():
         print("Expected labels:", expected_labels)
 
 
+def question_2a():
+    # data = np.load("mnist_all.npz")
+    sample_sizes = [5, 10, 20, 40, 60, 80, 100]
+    # sample_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    average_errors = []
+    error_min = []
+    error_max = []
+
+    for size in sample_sizes:
+        errors = []
+        for _ in range(10):
+            x_train, y_train = gensmallm([data["train2"], data["train3"], data["train5"], data["train6"]],
+                                         [2, 3, 5, 6], size)
+            x_test, y_test = gensmallm([data["test2"], data["test3"], data["test5"], data["test6"]],
+                                       [2, 3, 5, 6], size)
+
+            classifier = learnknn(1, x_train, y_train)
+            y_test_pred = predictknn(classifier, x_test)
+
+            error = np.mean(y_test != list(np.concatenate(y_test_pred).flat))
+            errors.append(error)
+
+        average_errors.append(np.mean(errors))
+        error_min.append(np.min(errors))
+        error_max.append(np.max(errors))
+
+    plt.scatter(sample_sizes, error_max, color="green")
+    plt.scatter(sample_sizes, error_min, color="red")
+    plt.scatter(sample_sizes, average_errors, color="blue")
+    x = sample_sizes
+    y = average_errors
+    up = [item1 - item2 for item1, item2 in zip(error_max, average_errors)]
+    down = [item1 - item2 for item1, item2 in zip(average_errors, error_min)]
+    yerr = [down, up]
+    plt.xlabel('Training Sample Size')
+    plt.ylabel('Average Test Error')
+    plt.title('KNN Test Error vs Training Sample Size')
+    plt.errorbar(x, y, yerr=yerr, capsize=3, fmt="r--o", ecolor="black")
+    plt.show()
 if __name__ == '__main__':
 
     # before submitting, make sure that the function simple_test runs without errors
-    test_knn()
-    simple_test()
+    question_2a()
+    # test_knn()
+    # simple_test()
 
 
